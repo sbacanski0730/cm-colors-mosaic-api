@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import config from 'config';
 import AppRoutes from './routes/AppRoutes';
+import Logger from './utils/Logger';
 
 class App {
 	private port: string = config.get('port');
@@ -21,7 +22,7 @@ class App {
 
 	private listen = () => {
 		this.app.listen(this.port, () => {
-			console.log(`Server is listing at port ${this.port}`);
+			Logger.info(`Server is listing at port ${this.port}`);
 		});
 	};
 }

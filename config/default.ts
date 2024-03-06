@@ -1,3 +1,4 @@
 export default {
-	port: '7000',
+	logLevel: 'info',
+	port: '5014',
 };

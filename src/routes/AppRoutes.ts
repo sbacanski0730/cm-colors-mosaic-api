@@ -1,13 +1,14 @@
 import { Application } from 'express';
 import AppController from '../controllers/AppController';
+import AuthRoutes from './AuthRoutes';
 
 class AppRoutes {
-	private appController = new AppController();
+	private authRoutes = new AuthRoutes();
 
 	public constructor() {}
 
 	public createRoutes = (app: Application) => {
-		app.route('/').get(this.appController.helloWorldHandler);
+		this.authRoutes.createAuthRoutes(app);
 	};
 }
 

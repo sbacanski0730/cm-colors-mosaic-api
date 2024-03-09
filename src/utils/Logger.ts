@@ -19,7 +19,7 @@ const customFormat = combine(
 		colors: { info: 'yellow', error: 'red', warn: 'cyan', timestamp: 'red' },
 	}),
 	winston.format.printf((info) => {
-		return `${info.timestamp} ${info.level} ${info.message} \n`;
+		return `${info.timestamp} ${info.level} ${info.message}`;
 	})
 );
 

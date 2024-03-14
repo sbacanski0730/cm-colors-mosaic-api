@@ -1,5 +1,4 @@
 import { Application } from 'express';
-import AppController from '../controllers/AppController';
 import AuthRoutes from './AuthRoutes';
 
 class AppRoutes {

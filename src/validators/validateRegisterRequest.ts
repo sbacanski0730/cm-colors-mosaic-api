@@ -16,9 +16,11 @@ const validateRegisterRequest = (req: Request, res: Response, next: NextFunction
 	} catch (error: any) {
 		if (error instanceof z.ZodError) {
 			const errors: string[] = error.issues.map((e: any) => e.message);
-			Logger.error(errors);
+
 			return res.status(400).send(errors);
 		}
+
+		return res.status(500).send(error);
 	}
 };
 

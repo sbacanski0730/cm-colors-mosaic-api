@@ -1,9 +1,21 @@
-import mongoose from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import bcrypt from 'bcrypt';
-import IUser from '../interfaces/IUser';
 import { nanoid } from 'nanoid';
 
-const UserSchema = new mongoose.Schema<IUser>(
+export interface IUser extends mongoose.Document {
+	email: string;
+	password: string;
+	verified: boolean;
+	verificationCode: string;
+}
+
+export interface IUserMethods {
+	comparePasswords(password: string): Promise<boolean>;
+}
+
+export type IUserModel = mongoose.Model<IUser, {}, IUserMethods>;
+
+const UserSchema = new mongoose.Schema<IUser, IUserModel, IUserMethods>(
 	{
 		email: {
 			type: String,
@@ -30,11 +42,15 @@ const UserSchema = new mongoose.Schema<IUser>(
 );
 
 // refactor - it change password every time when 'save'
-UserSchema.pre('save', async function (next) {
+UserSchema.pre<IUser>('save', async function (next: mongoose.CallbackWithoutResultAndOptionalError): Promise<void> {
 	const password = await bcrypt.hash(this.password, 10);
 	this.password = password;
 	next();
 });
+
+UserSchema.methods.comparePasswords = async function (password: string): Promise<boolean> {
+	return await bcrypt.compare(password, this.password);
+};
 
 const User = mongoose.model('User', UserSchema);
 

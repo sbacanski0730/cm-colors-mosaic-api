@@ -18,6 +18,10 @@ class App {
 		this.connectDb();
 		this.listen();
 	}
+	// TODO: add validation to for login requests,
+	// login request should validate that user-agent are not undefined
+	// proper working of the application require user-agent proper value
+	// DOUBT: to ^ - if validation has been already created, do access token type needs undefined as a type of user-agent?
 
 	private config = () => {
 		this.app.use(express.json());

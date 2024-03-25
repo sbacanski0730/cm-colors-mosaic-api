@@ -1,5 +1,4 @@
-import User from '../models/UserModel';
-import IUser from '../interfaces/IUser';
+import User, { IUser, IUserModel, IUserMethods } from '../models/UserModel';
 import mongoose from 'mongoose';
 
 class UserServices {
@@ -9,12 +8,11 @@ class UserServices {
 		return User.create(input);
 	};
 
-	public static findUserById = (id: string) => {
-		return User.findById(id);
+	public static findUserById = async (id: string): Promise<IUser | null> => {
+		return await User.findById(id);
 	};
 
-	// need proper type - refactor needed
-	public static findUser = (query: any) => {
+	public static findUser = async (query: mongoose.FilterQuery<IUser>): Promise<(IUser & IUserMethods) | null> => {
 		return User.findOne(query);
 	};
 }

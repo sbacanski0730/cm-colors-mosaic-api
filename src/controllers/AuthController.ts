@@ -2,8 +2,13 @@ import { Request, Response } from 'express';
 import config from 'config';
 import UserServices from '../services/UserServices';
 import Mailer from '../utils/Mailer';
-import Logger from '../utils/Logger';
 import _ from 'lodash';
+import Logger from '../utils/Logger';
+import mongoose, { Document } from 'mongoose';
+import { IUser, IUserModel } from '../models/UserModel';
+import Session from '../models/SessionModel';
+import SessionService from '../services/SessionService';
+import Jwt from '../utils/Jwt';
 
 class AuthController {
 	public constructor() {}
@@ -16,7 +21,8 @@ class AuthController {
 
 			const mailer = new Mailer();
 
-			// just prototype
+			// NOTE: prototype
+			// NOTE: all mailer functionality is a prototype
 			const message = `
 			<head>
 				<style>
@@ -47,6 +53,7 @@ class AuthController {
 
 	public userAccountVerificationHandler = async (req: Request, res: Response): Promise<Response> => {
 		try {
+			// REFACTOR: this data (data, verificationCode) should be in params
 			const { email, verificationCode } = req.body;
 
 			const user = await UserServices.findUser({ email });
@@ -60,7 +67,7 @@ class AuthController {
 			}
 
 			if (user.verificationCode !== verificationCode) {
-				return res.send('User imposable to verification');
+				return res.status(401).send('User imposable to verification');
 			}
 
 			if (user.verificationCode === verificationCode) {
@@ -72,6 +79,38 @@ class AuthController {
 		} catch (err) {
 			Logger.error(err);
 			return res.send(err).status(500);
+		}
+	};
+
+	public userLoginHandler = async (req: Request, res: Response) => {
+		try {
+			const { email, password } = req.body;
+
+			const user = await UserServices.findUser({ email });
+
+			if (!user) return res.status(400).send('Wrong credentials');
+
+			if (!user.verified) return res.status(400).send('User needs to be verified');
+
+			if (!(await user.comparePasswords(password))) return res.status(400).send('Wrong credentials');
+
+			// DOUBT: figure it out what to do when session with given user and user-agent already exist
+			// DOUBT: is this resolve enough
+			if (await SessionService.findSession({ user: user._id, userAgent: req.headers['user-agent'] }))
+				return res.status(500).send('This session already exist');
+
+			const session = await SessionService.createSession({
+				user: user._id,
+				userAgent: req.headers['user-agent'],
+			});
+
+			const accessToken = Jwt.createAccessToken({ userId: user._id, userAgent: req.headers['user-agent'] });
+			const refreshToken = Jwt.createRefreshToken({ sessionId: session._id });
+
+			return res.status(200).send({ accessToken, refreshToken });
+		} catch (error) {
+			Logger.error(error);
+			return res.status(500).send(error);
 		}
 	};
 }

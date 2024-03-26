@@ -58,6 +58,7 @@ class AuthController {
 
 			const user = await UserServices.findUser({ email });
 
+			// REFACTOR: change if statements to one-liner (without curly brackets)
 			if (!user) {
 				return res.status(404).send('User not found');
 			}

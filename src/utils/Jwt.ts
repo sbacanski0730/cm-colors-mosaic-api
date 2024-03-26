@@ -11,7 +11,7 @@ type AccessTokenPayload = {
 
 type RefreshTokenPayload = {
 	// DOUBT: what to give to refresh token as payload?
-	// DOUBT: why not and what are other options?
+	// DOUBT: if not why and what are other options?
 	sessionId: mongoose.Types.ObjectId;
 };
 
@@ -42,9 +42,20 @@ class Jwt {
 	};
 
 	// NOTE: verification takes publicKey
-	static verifyAccessToken = (accessToken: string) => {};
+	// FIXME: I know I know - do not repeat yourself
+	static verifyAccessToken = (accessToken: string) => {
+		return jwt.verify(accessToken, this.accessTokenPublicKey, (err, decode) => {
+			if (err) return null;
+			if (decode) return decode;
+		});
+	};
 
-	static verifyRefreshToken = (refreshToken: string) => {};
+	static verifyRefreshToken = (refreshToken: string) => {
+		return jwt.verify(refreshToken, this.refreshTokenPublicKey, (err, decode) => {
+			if (err) return null;
+			if (decode) return decode;
+		});
+	};
 }
 
 export default Jwt;
